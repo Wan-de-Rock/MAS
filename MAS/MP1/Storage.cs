@@ -14,13 +14,16 @@ namespace MP1
 
         public int ID { get; }
         public List<Item> StoreHouse { get; private set; }
+
         private static Dictionary<ItemType, int> ItemTypeCounter = new Dictionary<ItemType, int>();
+        private static List<Storage> Storages = new List<Storage>();
 
         private static int counter = 1;
         public Storage()
         {
             ID = counter;
             counter++;
+            Storages.Add(this);
 
             if (File.Exists(checkPathForId()))
             {
