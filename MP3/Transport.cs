@@ -175,43 +175,4 @@ namespace MP3
         }
 
     }
-
-    /*
-    public abstract class Transport
-    {
-        public int Power { get; }
-        public string? Name { get; }
-        
-
-        public Transport(int power, string? name = null)
-        {
-            Power = power;
-            Name = name;
-        }
-
-    }
-
-    public class Car : Transport
-    {
-        public Car(int power, string? name = null) : base(power, name)
-        {
-        }
-    }
-    public class Boat : Transport
-    {
-        public Boat(int power, string? name = null) : base(power, name)
-        {
-        }
-    }
-    public class Airplane : Transport
-    {
-        public Airplane(int power, string? name = null) : base(power, name)
-        {
-        }
-    }
-
-    */
-
-
-
 }

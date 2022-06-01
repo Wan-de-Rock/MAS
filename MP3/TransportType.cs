@@ -85,7 +85,4 @@ namespace MP3
         Air,
         Amphibian
     }
-
-    //public abstract class TransportBase : Transport { }
-
 }
