@@ -1,95 +1,134 @@
-﻿using System;
+﻿namespace MP1;
+
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-namespace MP1
+
+public class Storage
 {
-    public class Storage
+    private const string DIRECTORY = "Saves";
+    private const string FILE_NAME = "Data";
+    private static readonly string PATH = Path.Combine(Directory.GetCurrentDirectory(), @"../../../", DIRECTORY);
+
+    public int ID { get; }
+    public static int MaxItemId { get; private set; } = -1;
+    public static int NumberOfAllItems => GetNumberOfAllItems();
+    public List<Item> StoreHouse { get; private set; }
+
+    private static int counter = 0;
+
+    private static Dictionary<ItemType, int> ItemTypeCounter = new Dictionary<ItemType, int>();
+    private static List<Storage> Storages = new List<Storage>();
+
+    static Storage()
     {
-        private const string PATH = "Data.bin";
-
-        public int ID { get; }
-        public List<Item> StoreHouse { get; private set; }
-
-        private static Dictionary<ItemType, int> ItemTypeCounter = new Dictionary<ItemType, int>();
-        private static List<Storage> Storages = new List<Storage>();
-
-        private static int counter = 1;
-        public Storage()
+        if (Directory.Exists(PATH))
         {
-            ID = counter;
-            counter++;
-            Storages.Add(this);
+            string[] files = Directory.GetFiles(PATH);
 
-            if (File.Exists(checkPathForId()))
+            foreach (var file in files)
             {
-                StoreHouse = Load(checkPathForId());
-                foreach (var item in StoreHouse)
+                var list = Load(Path.Combine(PATH, file));
+                var storage = new Storage(list);
+                Storages.Add(storage);
+                foreach (var item in list)
                 {
-                    AddItem(item.Type);
+                    if (item.ID > MaxItemId)
+                        MaxItemId = item.ID;
+
+                    storage.AddItem(item.Type);
                 }
             }
-            else
-            {
-                StoreHouse = new List<Item>();
-            }
+            //NumberOfAllItems = GetNumberOfAllItems();
         }
-        public void AddItem(Item item)
+    }
+    public Storage()
+    {
+        ID = counter;
+        counter++;
+
+        if (ID < Storages.Count)
         {
-            StoreHouse.Add(item);
-            AddItem(item.Type);
+            StoreHouse = Storages[ID].StoreHouse;
+        }
+        else
+        {
+            Storages.Add(this);
+            StoreHouse = new List<Item>();
+        }
+    }
+    private Storage(List<Item> storeHouse)
+    {
+        StoreHouse = storeHouse;
+    }
+
+    public void AddItem(Item item)
+    {
+        StoreHouse.Add(item);
+        AddItem(item.Type);
+        Save(checkPathForId(), StoreHouse);
+        //NumberOfAllItems++;
+    }
+    private void AddItem(ItemType type)
+    {
+        if (ItemTypeCounter.ContainsKey(type))
+            ItemTypeCounter[type]++;
+        else
+            ItemTypeCounter.Add(type, 1);
+    }
+    public void ExtractItem(Item item)
+    {
+        if (StoreHouse.Contains(item))
+        {
+            StoreHouse.Remove(item);
+            //NumberOfAllItems--;
+            ItemTypeCounter[item.Type]--;
             Save(checkPathForId(), StoreHouse);
         }
-        private static void AddItem(ItemType type)
+        else
+            throw new ArgumentException("Storehouse does not contain this item");
+    }
+    public static int GetItemsCountForType(ItemType type)
+    {
+        if (ItemTypeCounter.ContainsKey(type))
+            return ItemTypeCounter[type];
+
+        return 0;
+    }
+    private static int GetNumberOfAllItems()
+    {
+        return ItemTypeCounter.Values.Sum();
+        /*
+        int num = 0;
+
+        foreach (var storage in Storages)
         {
-            if (ItemTypeCounter.ContainsKey(type))
-                ItemTypeCounter[type]++;
-            else
-                ItemTypeCounter.Add(type, 1);
+            num += storage.StoreHouse.Count;
         }
-        public void ExtractItem(Item item)
+
+        return num;
+        */
+    }
+    private void Save(string fileName, List<Item> data)
+    {
+        if (!Directory.Exists(PATH))
+            Directory.CreateDirectory(PATH);
+
+        BinaryFormatter bf = new BinaryFormatter();
+        using (Stream writer = new FileStream(fileName, FileMode.OpenOrCreate))
         {
-            if (StoreHouse.Contains(item))
-            {
-                StoreHouse.Remove(item);
-                ItemTypeCounter[item.Type]--;
-                Save(checkPathForId(), StoreHouse);
-            }
-            else
-                throw new ArgumentException("Storehouse does not contain this item");
+            bf.Serialize(writer, data);
         }
-        public static int GetItemsCountForType(ItemType type)
+    }
+    private static List<Item> Load(string fileName)
+    {
+        BinaryFormatter bf = new BinaryFormatter();
+        using (Stream reader = new FileStream(fileName, FileMode.Open))
         {
-            int count = ItemTypeCounter[type];
-            return count;
+            return (List<Item>)bf.Deserialize(reader);
         }
-        public static int GetNumberOfAllItems()
-        {
-            return ItemTypeCounter.Values.Sum();
-        }
-        private void Save(string fileName, List<Item> data)
-        {
-            BinaryFormatter bf = new BinaryFormatter();
-            using (Stream writer = new FileStream(fileName, FileMode.OpenOrCreate))
-            {
-                bf.Serialize(writer, data);
-            }
-        }
-        private List<Item> Load(string fileName)
-        {
-            BinaryFormatter bf = new BinaryFormatter();
-            using (Stream reader = new FileStream(fileName, FileMode.Open))
-            {
-                return (List<Item>)bf.Deserialize(reader);
-            }
-        }
-        private string checkPathForId()
-        {
-            string path = ID.ToString() + PATH;
-            return path;
-        }
+    }
+    private string checkPathForId()
+    {
+        return Path.Combine(PATH, FILE_NAME + (ID + 1).ToString() + ".dat");
     }
 }
