@@ -1,16 +1,16 @@
 ﻿namespace MP3;
 
-public abstract class TransportType  // Klasa abstrakcyjna
+public abstract class TransportType  // Abstract class
 {
     public TransportTypeEnum Type { get; }
     public TransportType(TransportTypeEnum type)
     {
         Type = type;
     }
-    public abstract string GetTypeOfMovement(); // Polimorficzne wołanie metody
+    public abstract string GetTypeOfMovement(); // Polimophic method call
 }
 
-public class WaterTransport : TransportType, IWaterTransport // Dziedziczenie
+public class WaterTransport : TransportType, IWaterTransport // Inheritance
 {
     public int VesselDisplacement { get; private set; } = 100;
 
@@ -20,7 +20,7 @@ public class WaterTransport : TransportType, IWaterTransport // Dziedziczenie
     }
 
     public void SetVesselDisplacement(int displacement) { VesselDisplacement = displacement; }
-    public override string GetTypeOfMovement() // Polimorficzne wołanie metody
+    public override string GetTypeOfMovement() // Polimophic method call
     {
         return $"Move by {Type} Transport";
     }
@@ -41,29 +41,29 @@ public class GrountTransport : TransportType // Dziedziczenie
         return $"Move by {Type} Transport";
     }
 }
-public class AirTransport : TransportType // Dziedziczenie
+public class AirTransport : TransportType // Inheritance
 {
     public AirTransport() : base(TransportTypeEnum.Air) { }
 
-    public override string GetTypeOfMovement() // Polimorficzne wołanie metody
+    public override string GetTypeOfMovement() // Polimophic method call
     {
         return $"Move by {Type} Transport";
     }
 }
 
-public class Amphibian : GrountTransport, IWaterTransport // Wielodziedziczenie
+public class Amphibian : GrountTransport, IWaterTransport // Multi inheritance
 {
-    public WaterTransport waterTransport { get; private set; } // Wielodziedziczenie kompozacja
+    public WaterTransport waterTransport { get; private set; } // Multi inheritance composition
 
     public Amphibian(int surfaceContact, string typeOfContact, int displacement) : base(TransportTypeEnum.Amphibian, surfaceContact, typeOfContact)
     {
-        waterTransport = new WaterTransport(displacement); // Wielodziedziczenie kompozacja
+        waterTransport = new WaterTransport(displacement); // Multi inheritance composition
     }
 
     public void SetVesselDisplacement(int displacement) { 
         waterTransport.SetVesselDisplacement(displacement);
     }
-    public override string GetTypeOfMovement() // Polimorficzne wołanie metody
+    public override string GetTypeOfMovement() // Polimophic method call
     {
         return $"Move by {Type}";
     }

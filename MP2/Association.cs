@@ -1,11 +1,24 @@
 ﻿namespace MP2;
 
-public class Engine { }
+public class Engine
+{
+    public EngineType Type { get; }
+
+    public Engine(EngineType type)
+    {
+        Type = type;
+    }
+
+    public override string ToString()
+    {
+        return $"Engine type: {Type}";
+    }
+}
 public class Person
 {
     public string Name { get; }
-    public Station ?Station { get; set; }
-    public List<Rent> Rents { get; private set; } = new List<Rent>();
+    public Station ?Station { get; set; } /* Binary association */
+    public List<Rent> Rents { get; private set; } = new List<Rent>(); /* Association with attribute */
 
     public Person(string name)
     {
@@ -36,15 +49,17 @@ public class Car
 {
     public int Id { get; }
     public int DayRentalCost { get; }
-    public Engine Engine { get; }
-    public List<Rent> Rents { get; private set; } = new List<Rent>();
+    public List<Rent> Rents { get; private set; } = new List<Rent>(); /* Association with attribute */
+
+    private Engine _engine; // Composition
 
     private static int counter = 0;
-    public Car(int dayRentalCost)
+    public Car(int dayRentalCost, EngineType type)
     {
         Id = counter++;
-        Engine = new Engine();
         DayRentalCost = dayRentalCost;
+
+        _engine = new Engine(type); // Composition
     }
 
     public void AddRent(Rent rent)
@@ -61,13 +76,18 @@ public class Car
             Rents.Remove(rent);
     }
 
+    public EngineType GetEngineType()
+    {
+        return _engine.Type;
+    }
+
     public override string ToString()
     {
         return $"ID: {Id} | Rental: {DayRentalCost}";
     }
 }
 
-public class Rent
+public class Rent /* Attribute of association */
 {
     public Car Car { get; }
     public Person Person { get; }
@@ -88,8 +108,8 @@ public class Rent
 
 public class Station
 {
-    public Person ?Owner { get; set; }
-    public Dictionary<int, Car> Cars { get; private set; } = new Dictionary<int, Car>();
+    public Person ?Owner { get; set; } /* Binary association */
+    public Dictionary<int, Car> Cars { get; private set; } = new Dictionary<int, Car>(); /* Qualified association */
 
     public void AddCar(Car car)
     {
@@ -112,4 +132,12 @@ public class Station
     {
         return string.Join(Environment.NewLine, Cars);
     }
+}
+
+public enum EngineType
+{
+    Petrol,
+    Diesel,
+    Electric,
+    Gas
 }

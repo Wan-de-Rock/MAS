@@ -158,45 +158,96 @@ public class OverlappingTransport
 
 public class MultiaspectTransport
 {
-    public int Power { get; }
-    public int Fuel { get; }
-    public TransportTypeEnum TransportType { get; private set; }
+    public bool canSwim { get; private set; }
+    public bool canDrive { get; private set; }
+    public bool canFly { get; private set; }
+    public TransportTypeEnum Type { get; private set; }
 
-    private MultiaspectTransport(int power, int fuel)
+    protected MultiaspectTransport(TransportTypeEnum type)
     {
-        Power = power;
-        Fuel = fuel;
-    }
-    public MultiaspectTransport(int power, int fuel, TransportTypeEnum transportType)
-    {
-        Power = power;
-        Fuel = fuel;
-        TransportType = transportType;
+        Type = type;
+        this.SetTransportType(type);
     }
 
-    public static MultiaspectTransport CreateTransportA(int power, int fuel)
+    public static MultiaspectTransport CreateAirTypeTransport(TransportTypeEnum type)
     {
-        var transport = new MultiaspectTransport(power, fuel);
-        transport.TransportType = TransportTypeEnum.Air;
+        if (type != TransportTypeEnum.Air)
+            throw new ArgumentException("Type is not Air");
 
+        var transport = new MultiaspectTransport(type);
         return transport;
     }
+    public static MultiaspectTransport CreateWaterTypeTransport(TransportTypeEnum type)
+    {
+        if (type != TransportTypeEnum.Water)
+            throw new ArgumentException("Type is not Water");
+
+        var transport = new MultiaspectTransport(type);
+        return transport;
+    }
+
+    private void SetTransportType(TransportTypeEnum transportType)
+    {
+        switch (transportType)
+        {
+            case TransportTypeEnum.Water:
+                canSwim = true;
+                canDrive = false;
+                canFly = false;
+                break;
+            case TransportTypeEnum.Ground:
+                canSwim = false;
+                canDrive = true;
+                canFly = false;
+                break;
+            case TransportTypeEnum.Air:
+                canSwim = false;
+                canDrive = false;
+                canFly = true;
+                break;
+            case TransportTypeEnum.Amphibian:
+                canSwim = true;
+                canDrive = true;
+                canFly = false;
+                break;
+            default:
+                break;
+        }
+    }
+
     public override string ToString()
     {
-        return $"Power: {Power}, Fuel: {Fuel}, Type: {TransportType}";
+        return $"Can swim: {canSwim}, Can drive: {canDrive}, Can fly: {canFly}, Type: {Type}";
     }
 }
 
-public class TransportB : MultiaspectTransport // Multiaspect
+public class MultiaspectTransportWater : MultiaspectTransport // Multi aspect
 {
     public string Name { get; }
-    public TransportB(MultiaspectTransport multiaspectTransport, string name) : base(multiaspectTransport.Power, multiaspectTransport.Fuel, multiaspectTransport.TransportType)
+    public int Speed { get; }
+    public MultiaspectTransportWater(string name, int speed) : base(TransportTypeEnum.Water)
     {
         Name = name;
+        Speed = speed;
     }
 
     public override string ToString()
     {
-        return base.ToString() + $", Name: {Name}";
+        return base.ToString() + $", Name: {Name}, Speed: {Speed}";
+    }
+}
+public class MultiaspectTransportAir : MultiaspectTransport // Multi aspect
+{
+    public string Name { get; }
+    public int High { get; }
+    public MultiaspectTransportAir(string name, int high) : base(TransportTypeEnum.Air)
+    {
+        Name = name;
+        High = high;
+    }
+
+    public override string ToString()
+    {
+        return base.ToString() + $", Name: {Name}, High: {High}";
     }
 }
