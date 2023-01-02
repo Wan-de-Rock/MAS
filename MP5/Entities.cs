@@ -25,11 +25,25 @@ public class Driver
 {
     public int Id { get; set; }
     public Person Person { get; set; }
-    public HashSet<Car> Cars { get; set; } = new HashSet<Car>();
+    public HashSet<Car> Cars { get; private set; } = new HashSet<Car>();
+    public Driver() { }
+
     public Driver(Person person)
     {
         Person = person;
     }
+
+    public Driver(string name, string surname)
+    {
+        Person = new Person(name, surname);
+    }
+
+    public void AddCar(Car car)
+    {
+        Cars.Add(car);
+        car.Drivers.Add(this);
+    }
+
 
     public override string ToString()
     {
@@ -41,11 +55,23 @@ public class Mechanic
 {
     public int Id { get; set; }
     public Person Person { get; set; }
-    public HashSet<Car> Cars { get; set; } = new HashSet<Car>();
+    public HashSet<Car> Cars { get; private set; } = new HashSet<Car>();
 
+    public Mechanic() { }
     public Mechanic(Person person)
     {
         Person = person;
+    }
+
+    public Mechanic(string name, string surname)
+    {
+        Person = new Person(name, surname);
+    }
+
+    public void AddCar(Car car)
+    {
+        Cars.Add(car);
+        car.Mechanics.Add(this);
     }
 
     public override string ToString()
@@ -58,12 +84,12 @@ public class Car
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    public HashSet<Driver> Drivers { get; set; }
-    public HashSet<Mechanic> Mechanics { get; set; }
+    public HashSet<Driver> Drivers { get; set; } = new HashSet<Driver>();
+    public HashSet<Mechanic> Mechanics { get; set; } = new HashSet<Mechanic>();
 
-    public Car()
+    public Car() { }
+    public Car(string name)
     {
-        Drivers = new HashSet<Driver>();
-        Mechanics = new HashSet<Mechanic>();
+        Name = name;
     }
 }
