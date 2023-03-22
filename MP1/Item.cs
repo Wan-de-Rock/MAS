@@ -1,48 +1,44 @@
-﻿namespace MP1;
+﻿using System.Text.Json.Serialization;
 
-[Serializable]
-public class Item : IComparable<Item>
+namespace MP1;
+
+public class Item
 {
     public int ID { get; }
     public int Size { get; }
-    public string? Name { get; }
-    public ItemType Type { get; }
+    public string? Name { get; } = "unknown"; // Atrybut opcjonalny
 
-    private static int counter = 0;
-    public Item(int size, string? name, ItemType type)
+    [JsonConverter(typeof(DateOnlyJsonConverter))]
+    public DateOnly DateOfManufacture { get; } // Atrybut zlozony
+
+    private static int counter = 0; // Atrybut klasowy
+    public Item(int size, DateOnly dateOfManufacture, string? name = "none", int id = -1)
     {
-        ID = ++counter + Storage.MaxItemId;
-        Size = size;
-        Type = type;
-
-        if (name is null)
-            Name = "none";
+        if (id < 0)
+        {
+            ID = counter;
+            counter++;
+        }
         else
+        {
+            ID = id;
+            if (counter <= id)
+                counter = id + 1;
+        }
+
+        Size = size;
+        DateOfManufacture = dateOfManufacture;
+        Name = name;
+
+        /*
+        if (name is not null)
             Name = name;
+        */
     }
 
-    public int CompareTo(Item? other)
-    {
-        if (other == null)
-            throw new ArgumentNullException("other");
-
-        if (Size > other.Size)
-            return 1;
-        if (Size < other.Size)
-            return -1;
-
-        return ID.CompareTo(other.ID);
-    }
-
+    //Przesłonięcie
     public override string? ToString()
     {
-        return $"ID: {ID} \tSize: {Size} \tName: {Name} \tType: {Type}";
+        return $"ID: {ID} \tSize: {Size} \tName: {Name} \tDate of Manufacture: {DateOfManufacture}";
     }
-}
-
-public enum ItemType
-{
-    A,
-    B,
-    C
 }

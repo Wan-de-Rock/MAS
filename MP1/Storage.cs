@@ -1,45 +1,27 @@
 ﻿namespace MP1;
 
 using System.Collections.Generic;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public class Storage
 {
     private const string DIRECTORY = "Saves";
-    private const string FILE_NAME = "Data";
-    private static readonly string PATH = Path.Combine(Directory.GetCurrentDirectory(), @"../../../", DIRECTORY);
+    public const string FILE_NAME = "save.json";
+    public static readonly string PATH = Path.Combine(Directory.GetCurrentDirectory(), @"../../../", DIRECTORY);
 
     public int ID { get; }
-    public static int MaxItemId { get; private set; } = -1;
-    public static int NumberOfAllItems => GetNumberOfAllItems();
-    public List<Item> StoreHouse { get; private set; }
+    public static int NumberOfAllItems => GetNumberOfAllItems(); //Atrybut pochodny / Atrybut klasowy
+    public List<Item> StoreHouse { get; private set; } // Atrybut powtarzalny
+    public static List<Storage> Storages { get; private set; } //Ekstensja
 
-    private static int counter = 0;
-
-    private static Dictionary<ItemType, int> ItemTypeCounter = new Dictionary<ItemType, int>();
-    private static List<Storage> Storages = new List<Storage>();
+    private static int counter = 0; //Atrybut klasowy
 
     static Storage()
     {
-        if (Directory.Exists(PATH))
-        {
-            string[] files = Directory.GetFiles(PATH);
-
-            foreach (var file in files)
-            {
-                var list = Load(Path.Combine(PATH, file));
-                var storage = new Storage(list);
-                Storages.Add(storage);
-                foreach (var item in list)
-                {
-                    if (item.ID > MaxItemId)
-                        MaxItemId = item.ID;
-
-                    storage.AddItem(item.Type);
-                }
-            }
-            //NumberOfAllItems = GetNumberOfAllItems();
-        }
+        var json = LoadJson(PATH, FILE_NAME);
+        Storages = new List<Storage>(json);
     }
     public Storage()
     {
@@ -56,79 +38,94 @@ public class Storage
             StoreHouse = new List<Item>();
         }
     }
-    private Storage(List<Item> storeHouse)
+
+    [JsonConstructor]
+    public Storage(int id, List<Item> storeHouse)
     {
+        ID = id;
         StoreHouse = storeHouse;
     }
 
+    ////// Przeciążenie ///////
     public void AddItem(Item item)
     {
         StoreHouse.Add(item);
-        AddItem(item.Type);
-        Save(checkPathForId(), StoreHouse);
-        //NumberOfAllItems++;
+        SaveJson(PATH, FILE_NAME, Storages);
     }
-    private void AddItem(ItemType type)
+    public void AddItem(int size, DateOnly date, string? name)
     {
-        if (ItemTypeCounter.ContainsKey(type))
-            ItemTypeCounter[type]++;
-        else
-            ItemTypeCounter.Add(type, 1);
+        AddItem(new Item(size, date, name));
     }
+    ///////////////////////////
     public void ExtractItem(Item item)
     {
         if (StoreHouse.Contains(item))
         {
             StoreHouse.Remove(item);
-            //NumberOfAllItems--;
-            ItemTypeCounter[item.Type]--;
-            Save(checkPathForId(), StoreHouse);
+            SaveJson(PATH, FILE_NAME, Storages);
         }
         else
             throw new ArgumentException("Storehouse does not contain this item");
     }
-    public static int GetItemsCountForType(ItemType type)
-    {
-        if (ItemTypeCounter.ContainsKey(type))
-            return ItemTypeCounter[type];
 
-        return 0;
-    }
     private static int GetNumberOfAllItems()
     {
-        return ItemTypeCounter.Values.Sum();
-        /*
-        int num = 0;
+        int numOfItems = 0;
+        foreach (var store in Storages)
+            numOfItems += store.StoreHouse.Count;
 
-        foreach (var storage in Storages)
-        {
-            num += storage.StoreHouse.Count;
-        }
-
-        return num;
-        */
+        return numOfItems;
     }
-    private void Save(string fileName, List<Item> data)
-    {
-        if (!Directory.Exists(PATH))
-            Directory.CreateDirectory(PATH);
 
-        BinaryFormatter bf = new BinaryFormatter();
-        using (Stream writer = new FileStream(fileName, FileMode.OpenOrCreate))
-        {
-            bf.Serialize(writer, data);
-        }
-    }
-    private static List<Item> Load(string fileName)
+    ////  Ekstensja - trwałość / Metoda klasowa
+    public static void SaveJson(string path, string fileName, ICollection<Storage> data)
     {
-        BinaryFormatter bf = new BinaryFormatter();
-        using (Stream reader = new FileStream(fileName, FileMode.Open))
+        if (!Directory.Exists(path))
+            Directory.CreateDirectory(path);
+
+        var options = new JsonSerializerOptions
         {
-            return (List<Item>)bf.Deserialize(reader);
+            WriteIndented = true,
+            IgnoreReadOnlyProperties = false,
+            //DefaultIgnoreCondition = JsonIgnoreCondition.Never
+
+            //Converters = { new DateOnlyJsonConverter() }
+        };
+
+        using (FileStream fs = new FileStream(Path.Combine(path, fileName), FileMode.OpenOrCreate))
+        {
+            JsonSerializer.Serialize(fs, data, options);
         }
     }
-    private string checkPathForId()
+    public static List<Storage> LoadJson(string path, string fileName)
     {
-        return Path.Combine(PATH, FILE_NAME + (ID + 1).ToString() + ".dat");
+        if (!Directory.Exists(path))
+            Directory.CreateDirectory(path);
+
+        var list = new List<Storage>();
+        using (FileStream fs = new FileStream(Path.Combine(path, fileName), FileMode.OpenOrCreate))
+        {
+            if (fs.Length != 0)
+            {
+                list = JsonSerializer.Deserialize<List<Storage>>(fs);
+            }
+        }
+        return list;
+    }
+    //////////////////////////
+}
+
+public class DateOnlyJsonConverter : JsonConverter<DateOnly>
+{
+    private const string Format = "dd-MM-yyyy";
+
+    public override DateOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        return DateOnly.ParseExact(reader.GetString(), Format, CultureInfo.InvariantCulture);
+    }
+
+    public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.ToString(Format, CultureInfo.InvariantCulture));
     }
 }
