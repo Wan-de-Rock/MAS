@@ -10,7 +10,7 @@ public abstract class TransportType  // Abstract class
     public abstract string GetTypeOfMovement(); // Polimophic method call
 }
 
-public class WaterTransport : TransportType, IWaterTransport // Inheritance
+public class WaterTransport : TransportType, IWaterTransport // Disjoint inheritance
 {
     public int VesselDisplacement { get; private set; } = 100;
 
@@ -25,7 +25,7 @@ public class WaterTransport : TransportType, IWaterTransport // Inheritance
         return $"Move by {Type} Transport";
     }
 }
-public class GrountTransport : TransportType // Dziedziczenie
+public class GrountTransport : TransportType // Disjoint inheritance
 {
     public int SurfaceContact { get; set; } = 150;
     public string TypeOfContact { get; }
@@ -36,12 +36,12 @@ public class GrountTransport : TransportType // Dziedziczenie
         TypeOfContact = typeOfContact;
     }
 
-    public override string GetTypeOfMovement() // Polimorficzne wołanie metody
+    public override string GetTypeOfMovement() // Polimophic method call
     {
         return $"Move by {Type} Transport";
     }
 }
-public class AirTransport : TransportType // Inheritance
+public class AirTransport : TransportType // Disjoint inheritance
 {
     public AirTransport() : base(TransportTypeEnum.Air) { }
 
