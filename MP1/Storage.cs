@@ -12,11 +12,17 @@ public class Storage
     public static readonly string PATH = Path.Combine(Directory.GetCurrentDirectory(), @"../../../", DIRECTORY);
 
     public int ID { get; }
-    public static int NumberOfAllItems => GetNumberOfAllItems(); //Atrybut pochodny / Atrybut klasowy
-    public List<Item> StoreHouse { get; private set; } // Atrybut powtarzalny
-    public static List<Storage> Storages { get; private set; } //Ekstensja
+    public static int NumberOfAllItems  // Derived attribute / Class attribute
+    {
+        get
+        {
+            return GetNumberOfAllItems();
+        }
+    }
+    public List<Item> StoreHouse { get; private set; } // Multivalued attribute
+    public static List<Storage> Storages { get; private set; } // Extent
 
-    private static int counter = 0; //Atrybut klasowy
+    private static int counter = 0; // Class attribute
 
     static Storage()
     {
@@ -46,7 +52,7 @@ public class Storage
         StoreHouse = storeHouse;
     }
 
-    ////// Przeciążenie ///////
+    ////// Overload ///////
     public void AddItem(Item item)
     {
         StoreHouse.Add(item);
@@ -77,7 +83,7 @@ public class Storage
         return numOfItems;
     }
 
-    ////  Ekstensja - trwałość / Metoda klasowa
+    ////  Extent - persistency / Class method
     public static void SaveJson(string path, string fileName, ICollection<Storage> data)
     {
         if (!Directory.Exists(path))

@@ -1,0 +1,102 @@
+[
+  {
+    "ID": 0,
+    "StoreHouse": [
+      {
+        "ID": 0,
+        "Size": 15,
+        "Name": null,
+        "DateOfManufacture": "05-11-2005"
+      },
+      {
+        "ID": 1,
+        "Size": 54,
+        "Name": "a2",
+        "DateOfManufacture": "12-01-2015"
+      },
+      {
+        "ID": 3,
+        "Size": 23,
+        "Name": "none",
+        "DateOfManufacture": "01-02-2007"
+      },
+      {
+        "ID": 7,
+        "Size": 90,
+        "Name": null,
+        "DateOfManufacture": "18-08-2008"
+      },
+      {
+        "ID": 10,
+        "Size": 84,
+        "Name": "none",
+        "DateOfManufacture": "24-05-2020"
+      },
+      {
+        "ID": 12,
+        "Size": 77,
+        "Name": "c4",
+        "DateOfManufacture": "07-10-1975"
+      },
+      {
+        "ID": 13,
+        "Size": 50,
+        "Name": null,
+        "DateOfManufacture": "03-06-1572"
+      }
+    ]
+  },
+  {
+    "ID": 1,
+    "StoreHouse": [
+      {
+        "ID": 14,
+        "Size": 12,
+        "Name": null,
+        "DateOfManufacture": "19-12-2001"
+      },
+      {
+        "ID": 2,
+        "Size": 41,
+        "Name": "a4",
+        "DateOfManufacture": "19-12-2001"
+      },
+      {
+        "ID": 4,
+        "Size": 11,
+        "Name": null,
+        "DateOfManufacture": "14-03-2007"
+      },
+      {
+        "ID": 5,
+        "Size": 89,
+        "Name": "none",
+        "DateOfManufacture": "23-04-2010"
+      },
+      {
+        "ID": 6,
+        "Size": 19,
+        "Name": "b3",
+        "DateOfManufacture": "30-07-2011"
+      },
+      {
+        "ID": 8,
+        "Size": 21,
+        "Name": "none",
+        "DateOfManufacture": "24-02-2001"
+      },
+      {
+        "ID": 9,
+        "Size": 13,
+        "Name": "c1",
+        "DateOfManufacture": "27-03-2004"
+      },
+      {
+        "ID": 11,
+        "Size": 24,
+        "Name": "none",
+        "DateOfManufacture": "07-10-2012"
+      }
+    ]
+  }
+]
