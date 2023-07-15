@@ -1,8 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using System.Drawing;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Globalization;
-using System.Reflection.Emit;
 using TicketPurchaseService.Models;
 
 namespace TicketPurchaseService.Data
@@ -12,12 +9,13 @@ namespace TicketPurchaseService.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-            Database.EnsureDeleted();
+            //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            #region Set countries
             var countries = new List<Country>();
             var countriesNames = new HashSet<string>();
             int countryId = 1;
@@ -27,19 +25,24 @@ namespace TicketPurchaseService.Data
                 var ri = new RegionInfo(ci.LCID);
                 if (countriesNames.Add(ri.EnglishName))
                 {
-                    countries.Add(new Country
-                    {
-                        //Id = ri.GeoId,
-                        Id = countryId++,
-                        Name = ri.EnglishName,
-                        TwoLetterISOCountryCode = ri.TwoLetterISORegionName,
-                        ThreeLetterISOCountryCode = ri.ThreeLetterISORegionName
-                    }
+                    countries.Add(
+                        new Country
+                        {
+                            //Id = countryId++,
+                            Name = ri.EnglishName,
+                            TwoLetterISOCountryCode = ri.TwoLetterISORegionName,
+                            ThreeLetterISOCountryCode = ri.ThreeLetterISORegionName
+                        }
                     );
                 }
             }
 
+            countries.Sort();
+
+            foreach (var country in countries) { country.Id = countryId++; }
+
             builder.Entity<Country>().HasData(countries);
+            #endregion
 
             builder.Entity<Airport>().HasMany(x => x.Flights).WithOne(y => y.ArrivalAirport).HasForeignKey(z => z.ArrivalAirportId).OnDelete(DeleteBehavior.ClientSetNull);
             builder.Entity<Airline>().HasMany(x => x.Flights).WithOne(y => y.Airline).HasForeignKey(z => z.AirlineId).OnDelete(DeleteBehavior.ClientSetNull);
@@ -99,7 +102,8 @@ namespace TicketPurchaseService.Data
                 new Airline { Id = 5, Name = "Airfrance" }
             );
 
-            builder.Entity<Aircraft>().HasData(
+            var aircrafts = new Aircraft[]
+            {
                 new Aircraft { Number = "327senj", SeatsNumber = 300, AirlineId = 1 },
                 new Aircraft { Number = "weuihf7", SeatsNumber = 100, AirlineId = 1 },
                 new Aircraft { Number = "398f733", SeatsNumber = 46, AirlineId = 1 },
@@ -108,138 +112,100 @@ namespace TicketPurchaseService.Data
                 new Aircraft { Number = "34u4ff7", SeatsNumber = 454, AirlineId = 5 },
                 new Aircraft { Number = "3298f7", SeatsNumber = 78, AirlineId = 2 },
                 new Aircraft { Number = "3408fj8", SeatsNumber = 300, AirlineId = 4 }
-            );
+            };
 
-            builder.Entity<Flight>().HasData(
-                new Flight { Id = 1, AirlineId = 1, AircraftId = "327senj", DepartureAirportId = 2, ArrivalAirportId = 1, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(2), BasePrice = 1000 },
-                new Flight { Id = 2, AirlineId = 2, AircraftId = "3298f7", DepartureAirportId = 1, ArrivalAirportId = 4, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(3), BasePrice = 100 },
-                new Flight { Id = 3, AirlineId = 1, AircraftId = "weuihf7", DepartureAirportId = 4, ArrivalAirportId = 10, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(10), BasePrice = 500 },
-                new Flight { Id = 4, AirlineId = 5, AircraftId = "34984f", DepartureAirportId = 5, ArrivalAirportId = 4, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(1.5), BasePrice = 2100 },
-                new Flight { Id = 5, AirlineId = 3, AircraftId = "838f823", DepartureAirportId = 7, ArrivalAirportId = 2, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(20), BasePrice = 540 },
-                new Flight { Id = 6, AirlineId = 5, AircraftId = "34u4ff7", DepartureAirportId = 5, ArrivalAirportId = 7, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(1), BasePrice = 1200 },
-                new Flight { Id = 7, AirlineId = 4, AircraftId = "3408fj8", DepartureAirportId = 6, ArrivalAirportId = 1, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(2), BasePrice = 1050 },
-                new Flight { Id = 8, AirlineId = 1, AircraftId = "398f733", DepartureAirportId = 9, ArrivalAirportId = 10, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(2), BasePrice = 1007 },
-                new Flight { Id = 9, AirlineId = 4, AircraftId = "3408fj8", DepartureAirportId = 3, ArrivalAirportId = 2, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(9), BasePrice = 450 },
-                new Flight { Id = 10, AirlineId = 1, AircraftId = "398f733", DepartureAirportId = 8, ArrivalAirportId = 9, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(12), BasePrice = 7100 }
-            );
+            var flights = new Flight[]
+            {
+                new Flight { Id = 1, AirlineId = aircrafts[0].AirlineId, AircraftId = aircrafts[0].Number, AvailableSeats = aircrafts[0].SeatsNumber, DepartureAirportId = 2, ArrivalAirportId = 1, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(2), BasePrice = 1000 },
+                new Flight { Id = 2, AirlineId = aircrafts[5].AirlineId, AircraftId = aircrafts[5].Number, AvailableSeats = aircrafts[5].SeatsNumber, DepartureAirportId = 1, ArrivalAirportId = 4, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(3), BasePrice = 100 },
+                new Flight { Id = 3, AirlineId = aircrafts[2].AirlineId, AircraftId = aircrafts[2].Number, AvailableSeats = aircrafts[2].SeatsNumber, DepartureAirportId = 4, ArrivalAirportId = 10, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(10), BasePrice = 500 },
+                new Flight { Id = 4, AirlineId = aircrafts[3].AirlineId, AircraftId = aircrafts[3].Number, AvailableSeats = aircrafts[3].SeatsNumber, DepartureAirportId = 5, ArrivalAirportId = 4, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(1.5), BasePrice = 2100 },
+                new Flight { Id = 5, AirlineId = aircrafts[5].AirlineId, AircraftId = aircrafts[5].Number, AvailableSeats = aircrafts[5].SeatsNumber, DepartureAirportId = 7, ArrivalAirportId = 2, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(20), BasePrice = 540 },
+                new Flight { Id = 6, AirlineId = aircrafts[1].AirlineId, AircraftId = aircrafts[1].Number, AvailableSeats = aircrafts[1].SeatsNumber, DepartureAirportId = 5, ArrivalAirportId = 7, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(1), BasePrice = 1200 },
+                new Flight { Id = 7, AirlineId = aircrafts[6].AirlineId, AircraftId = aircrafts[6].Number, AvailableSeats = aircrafts[6].SeatsNumber, DepartureAirportId = 6, ArrivalAirportId = 1, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(2), BasePrice = 1050 },
+                new Flight { Id = 8, AirlineId = aircrafts[4].AirlineId, AircraftId = aircrafts[4].Number, AvailableSeats = aircrafts[4].SeatsNumber, DepartureAirportId = 9, ArrivalAirportId = 10, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(2), BasePrice = 1007 },
+                new Flight { Id = 9, AirlineId = aircrafts[7].AirlineId, AircraftId = aircrafts[7].Number, AvailableSeats = aircrafts[7].SeatsNumber, DepartureAirportId = 3, ArrivalAirportId = 2, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(9), BasePrice = 450 },
+                new Flight { Id = 10, AirlineId = aircrafts[1].AirlineId, AircraftId = aircrafts[1].Number, AvailableSeats = aircrafts[1].SeatsNumber, DepartureAirportId = 8, ArrivalAirportId = 9, DepartureDateTime = DateTime.Now, ArrivalDateTime = DateTime.Now.AddHours(12), BasePrice = 7100 }
+            };
 
+            var bookings = new Booking[]
+            {
+                new Booking { Id = 1, FlightId = 2, TravelId = 1, Seat = 2, TiketClass = TiketClass.First, Price = flights[1].BasePrice + (int)TiketClass.First },
+                new Booking { Id = 2, FlightId = 3, TravelId = 1, Seat = 25, TiketClass = TiketClass.First, Price = flights[2].BasePrice + (int)TiketClass.First },
+                new Booking { Id = 3, FlightId = 2, TravelId = 2, Seat = 10, TiketClass = TiketClass.First, Price = flights[1].BasePrice + (int)TiketClass.First },
+                new Booking { Id = 4, FlightId = 3, TravelId = 2, Seat = 17, TiketClass = TiketClass.First, Price = flights[2].BasePrice + (int)TiketClass.First },
+                new Booking { Id = 5, FlightId = 4, TravelId = 3, Seat = 20, TiketClass = TiketClass.Economy, Price = flights[3].BasePrice + (int)TiketClass.Economy }
+            };
 
-
-
-            builder.Entity<Order>().HasData(
-                new Order
-                {
-                    Id = 1,
-                    UserId = 1/*,
-                    Travels = new HashSet<Travel> {
-                        travel1,
-                        travel2
-                    }
-                    */
-
-                },
-                new Order
-                {
-                    Id = 2,
-                    UserId = 1/*,
-                    Travels = new HashSet<Travel> {
-                        travel3
-                    }
-                    */
-                }
-            );
-
-            builder.Entity<Travel>().HasData(
+            var travels = new Travel[]
+            {
                 new Travel
                 {
                     Id = 1,
                     OrderId = 1,
-                    PassengerId = 1
+                    PassengerId = 1,
+                    Price = bookings[0].Price + bookings[1].Price
                 },
                 new Travel
                 {
                     Id = 2,
                     OrderId = 1,
-                    PassengerId = 2
+                    PassengerId = 2,
+                    Price = bookings[2].Price + bookings[3].Price
                 },
                 new Travel
                 {
                     Id = 3,
                     OrderId = 2,
-                    PassengerId = 2
+                    PassengerId = 2,
+                    Price = bookings[4].Price
+                }
+            };
+
+            builder.Entity<Aircraft>().HasData(aircrafts);
+
+            builder.Entity<Flight>().HasData(flights);
+
+            builder.Entity<Order>().HasData(
+                new Order
+                {
+                    Id = 1,
+                    UserId = 1,
+                    TotalPrice = travels[0].Price + travels[1].Price
+                },
+                new Order
+                {
+                    Id = 2,
+                    UserId = 1,
+                    TotalPrice = travels[2].Price
                 }
             );
 
-            builder.Entity<Booking>().HasData(
-                new Booking { Id = 1, FlightId = 2, TravelId = 1, Seat = 20, TiketClass = TiketClass.First },
-                new Booking { Id = 2, FlightId = 3, TravelId = 1, Seat = 20, TiketClass = TiketClass.First },
-                new Booking { Id = 3, FlightId = 2, TravelId = 2, Seat = 20, TiketClass = TiketClass.First },
-                new Booking { Id = 4, FlightId = 3, TravelId = 2, Seat = 20, TiketClass = TiketClass.First },
-                new Booking { Id = 5, FlightId = 4, TravelId = 3, Seat = 20, TiketClass = TiketClass.Economy }
-             );
+            builder.Entity<Travel>().HasData(travels);
 
-
-
-
-            //var travel1 = new Travel
-            //{
-            //    Id = 1,
-            //    OrderId = 1,
-            //    PassengerId = 1/*
-            //    Bookings = new HashSet<Booking> {
-            //                   booking1, booking2
-            //    }
-            //    */
-            //};
-            //var travel2 = new Travel
-            //{
-            //    Id = 2,
-            //    OrderId = 1,
-            //    PassengerId = 2/*
-            //    Bookings = new HashSet<Booking> {
-            //                    booking3, booking4
-            //                }
-            //    */
-            //};
-            //var travel3 = new Travel
-            //{
-            //    Id = 3,
-            //    OrderId = 2,
-            //    PassengerId = 2/*
-            //    Bookings = new HashSet<Booking> {
-            //                    booking5
-            //                }
-            //    */
-            //};
-            //builder.Entity<Travel>().HasData(travel1, travel2);
-            //var booking1 = new Booking { Id = 1, FlightId = 2, TravelId = 1, Seat = 20, TiketClass = TiketClass.First };
-            //var booking2 = new Booking { Id = 2, FlightId = 3, TravelId = 1, Seat = 20, TiketClass = TiketClass.First };
-            //var booking3 = new Booking { Id = 3, FlightId = 2, TravelId = 2, Seat = 20, TiketClass = TiketClass.First };
-            //var booking4 = new Booking { Id = 4, FlightId = 3, TravelId = 2, Seat = 20, TiketClass = TiketClass.First };
-            //var booking5 = new Booking { Id = 5, FlightId = 4, TravelId = 3, Seat = 20, TiketClass = TiketClass.Economy };
-            //builder.Entity<Booking>().HasData(booking1, booking2, booking3, booking4, booking5);
-
-
+            builder.Entity<Booking>().HasData(bookings);
         }
 
-        public DbSet<TicketPurchaseService.Models.Order>? Order { get; set; }
+        #region DbSets
+        public DbSet<Order>? Orders { get; set; }
 
-        public DbSet<TicketPurchaseService.Models.Booking>? Booking { get; set; }
+        public DbSet<Booking>? Bookings { get; set; }
 
-        public DbSet<TicketPurchaseService.Models.Travel>? Travel { get; set; }
+        public DbSet<Travel>? Travels { get; set; }
 
-        public DbSet<TicketPurchaseService.Models.Flight>? Flight { get; set; }
+        public DbSet<Flight>? Flights { get; set; }
 
-        public DbSet<TicketPurchaseService.Models.Passenger>? Passenger { get; set; }
+        public DbSet<Passenger>? Passengers { get; set; }
 
-        public DbSet<TicketPurchaseService.Models.Person>? Person { get; set; }
+        public DbSet<Person>? Persons { get; set; }
 
-        public DbSet<TicketPurchaseService.Models.User>? User { get; set; }
+        public DbSet<User>? Users { get; set; }
 
-        public DbSet<TicketPurchaseService.Models.Airline>? Airline { get; set; }
+        public DbSet<Airline>? Airlines { get; set; }
 
-        public DbSet<TicketPurchaseService.Models.Airport>? Airport { get; set; }
+        public DbSet<Airport>? Airports { get; set; }
 
-        public DbSet<TicketPurchaseService.Models.Aircraft>? Aircraft { get; set; }
+        public DbSet<Aircraft>? Aircrafts { get; set; }
+        #endregion
     }
 }
