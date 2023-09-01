@@ -19,6 +19,11 @@ public class Booking
 
     public int TravelId { get; set; }
     public virtual Travel? Travel { get; set; }
+
+    public override string ToString()
+    {
+        return $"ID: {Id} Price: {Price}";
+    }
 }
 
 public enum TiketClass

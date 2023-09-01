@@ -144,21 +144,27 @@ namespace TicketPurchaseService.Data
                     Id = 1,
                     OrderId = 1,
                     PassengerId = 1,
-                    Price = bookings[0].Price + bookings[1].Price
+                    Price = bookings[0].Price + bookings[1].Price,
+                    DepartureDateTime = flights[bookings[0].FlightId-1].DepartureDateTime,
+                    ArrivalDateTime = flights[bookings[1].FlightId-1].ArrivalDateTime
                 },
                 new Travel
                 {
                     Id = 2,
                     OrderId = 1,
                     PassengerId = 2,
-                    Price = bookings[2].Price + bookings[3].Price
+                    Price = bookings[2].Price + bookings[3].Price,
+                    DepartureDateTime = flights[bookings[2].FlightId-1].DepartureDateTime,
+                    ArrivalDateTime = flights[bookings[3].FlightId-1].ArrivalDateTime
                 },
                 new Travel
                 {
                     Id = 3,
                     OrderId = 2,
                     PassengerId = 2,
-                    Price = bookings[4].Price
+                    Price = bookings[4].Price,
+                    DepartureDateTime = flights[bookings[4].FlightId-1].DepartureDateTime,
+                    ArrivalDateTime = flights[bookings[4].FlightId-1].ArrivalDateTime
                 }
             };
 
@@ -206,6 +212,8 @@ namespace TicketPurchaseService.Data
         public DbSet<Airport>? Airports { get; set; }
 
         public DbSet<Aircraft>? Aircrafts { get; set; }
+
+        public DbSet<Country>? Country { get; set; }
         #endregion
     }
 }

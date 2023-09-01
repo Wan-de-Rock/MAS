@@ -7,7 +7,7 @@ public class Program
         var store1 = new Storage();
         var store2 = new Storage();
 
-        Console.WriteLine($"\n\nNumber of elements after reading from file:  {Storage.NumberOfAllItems}\n\n"); // Derived pochodny / Class attribute
+        Console.WriteLine($"\n\nNumber of elements after reading from file:  {Storage.NumberOfAllItems}\n\n"); // Derived attribute / Class attribute
 
         var a1 = new Item(15, new DateOnly(day: 5, month: 11, year: 2005), null); // Optional attribute / Complex attribute
         var a2 = new Item(54, new DateOnly(day: 12, month: 1, year: 2015), "a2"); // Complex attribute

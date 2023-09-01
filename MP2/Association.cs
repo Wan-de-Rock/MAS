@@ -17,7 +17,7 @@ public class Engine
 public class Person
 {
     public string Name { get; }
-    public Station ?Station { get; set; } /* Binary association */
+    public Station? Station { get; set; } /* Binary association */
     public List<Rent> Rents { get; private set; } = new List<Rent>(); /* Association with attribute */
 
     public Person(string name)
@@ -108,7 +108,7 @@ public class Rent /* Attribute of association */
 
 public class Station
 {
-    public Person ?Owner { get; set; } /* Binary association */
+    public Person? Owner { get; set; } /* Binary association */
     public Dictionary<int, Car> Cars { get; private set; } = new Dictionary<int, Car>(); /* Qualified association */
 
     public void AddCar(Car car)

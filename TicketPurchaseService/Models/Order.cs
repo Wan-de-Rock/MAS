@@ -12,6 +12,11 @@ namespace TicketPurchaseService.Models
         public int UserId { get; set; }
         public virtual User? User { get; set; }
 
-        public ICollection<Travel>? Travels { get; set; }
+        public List<Travel>? Travels { get; set; }
+
+        public override string ToString()
+        {
+            return $"ID: {Id} Price: {TotalPrice}";
+        }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Xml.Linq;
 
 namespace TicketPurchaseService.Models;
 
@@ -22,5 +21,10 @@ public class Travel
     public int PassengerId { get; set; }
     public virtual Passenger? Passenger { get; set; }
 
-    public virtual ICollection<Booking>? Bookings { get; set; }
+    public virtual List<Booking>? Bookings { get; set; }
+
+    public override string ToString()
+    {
+        return $"ID: {Id} Price: {Price}";
+    }
 }
